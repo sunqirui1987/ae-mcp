@@ -11,24 +11,44 @@ type TextLayerInfo map[string]interface{}
 
 // TextOptions represents options for text layer creation or modification
 type TextOptions struct {
+	// Text appearance
 	FontSize      float64   `json:"fontSize,omitempty"`
 	FontName      string    `json:"fontName,omitempty"`
+	FontFamily    string    `json:"fontFamily,omitempty"`
+	FontStyle     string    `json:"fontStyle,omitempty"`
 	Color         ColorRGB  `json:"color,omitempty"`
+	FillColor     ColorRGB  `json:"fillColor,omitempty"`
+	StrokeColor   ColorRGB  `json:"strokeColor,omitempty"`
+	StrokeWidth   float64   `json:"strokeWidth,omitempty"`
+	ApplyFill     *bool     `json:"applyFill,omitempty"`
+	ApplyStroke   *bool     `json:"applyStroke,omitempty"`
+	Tracking      float64   `json:"tracking,omitempty"`
+	Leading       float64   `json:"leading,omitempty"`
+	
+	// Text positioning
 	Position      [2]float64 `json:"position,omitempty"`
 	Justification string    `json:"justification,omitempty"`
+	
+	// Text styling
+	FauxBold     *bool    `json:"fauxBold,omitempty"`
+	FauxItalic   *bool    `json:"fauxItalic,omitempty"`
+	AllCaps      *bool    `json:"allCaps,omitempty"`
+	SmallCaps    *bool    `json:"smallCaps,omitempty"`
 }
 
 // TextModifications represents modifications to be applied to a text layer
 type TextModifications map[string]interface{}
 
 // AddTextLayer adds a text layer to a composition
-func AddTextLayer(compName string, text string, options *TextOptions) (TextLayerInfo, error) {
+func AddTextLayer(compName string, layerName string, text string, options *TextOptions) (TextLayerInfo, error) {
 	// Default options
 	fontSize := 72.0
 	fontName := "Arial"
 	color := [3]float64{1.0, 1.0, 1.0} // White
 	position := [2]float64{0.0, 0.0}    // Center
-	justification := "CENTER"
+	justification := "CENTER_JUSTIFY" // Valid values: LEFT_JUSTIFY, CENTER_JUSTIFY, RIGHT_JUSTIFY
+	applyFill := true
+	tracking := 0.0
 	
 	// Apply provided options if available
 	if options != nil {
@@ -38,14 +58,35 @@ func AddTextLayer(compName string, text string, options *TextOptions) (TextLayer
 		if options.FontName != "" {
 			fontName = options.FontName
 		}
+		if options.FontFamily != "" {
+			fontName = options.FontFamily // Use fontFamily if provided
+		}
 		if options.Color != [3]float64{0, 0, 0} {
 			color = options.Color
+		}
+		if options.FillColor != [3]float64{0, 0, 0} {
+			color = options.FillColor // Use fillColor if provided
 		}
 		if options.Position != [2]float64{0, 0} {
 			position = options.Position
 		}
 		if options.Justification != "" {
-			justification = options.Justification
+			// Make sure the justification has _JUSTIFY suffix
+			if options.Justification == "LEFT" {
+				justification = "LEFT_JUSTIFY"
+			} else if options.Justification == "CENTER" {
+				justification = "CENTER_JUSTIFY"
+			} else if options.Justification == "RIGHT" {
+				justification = "RIGHT_JUSTIFY"
+			} else {
+				justification = options.Justification
+			}
+		}
+		if options.ApplyFill != nil {
+			applyFill = *options.ApplyFill
+		}
+		if options.Tracking != 0 {
+			tracking = options.Tracking
 		}
 	}
 
@@ -53,12 +94,15 @@ func AddTextLayer(compName string, text string, options *TextOptions) (TextLayer
 	script := `
 	try {
 		var compName = "` + compName + `";
+		var layerName = "` + layerName + `";
 		var textContent = "` + escapeJSString(text) + `";
 		var fontSize = ` + fmt.Sprintf("%f", fontSize) + `;
 		var fontName = "` + fontName + `";
 		var color = [` + fmt.Sprintf("%f, %f, %f", color[0], color[1], color[2]) + `];
 		var position = [` + fmt.Sprintf("%f, %f", position[0], position[1]) + `];
 		var justification = ParagraphJustification.` + justification + `;
+		var applyFill = ` + fmt.Sprintf("%t", applyFill) + `;
+		var tracking = ` + fmt.Sprintf("%f", tracking) + `;
 		
 		// Find the composition
 		var comp = null;
@@ -78,14 +122,20 @@ func AddTextLayer(compName string, text string, options *TextOptions) (TextLayer
 		
 		// Add the text layer
 		var textLayer = comp.layers.addText(textContent);
+		textLayer.name = layerName;
 		var textProp = textLayer.property("Source Text");
 		var textDocument = textProp.value;
 		
 		// Set text properties
 		textDocument.fontSize = fontSize;
 		textDocument.font = fontName;
+		textDocument.applyFill = applyFill;
 		textDocument.fillColor = color;
 		textDocument.justification = justification;
+		textDocument.tracking = tracking;
+		
+		// Apply additional properties if provided
+		` + getAdditionalTextProperties(options) + `
 		
 		// Apply the text document
 		textProp.setValue(textDocument);
@@ -102,6 +152,7 @@ func AddTextLayer(compName string, text string, options *TextOptions) (TextLayer
 		var result = {
 			name: textLayer.name,
 			index: textLayer.index,
+			id: textLayer.index,
 			text: textContent,
 			fontSize: fontSize,
 			fontName: fontName
@@ -141,6 +192,75 @@ func AddTextLayer(compName string, text string, options *TextOptions) (TextLayer
 	}
 
 	return nil, ErrInvalidResponse
+}
+
+// Helper function to generate additional text property settings based on options
+func getAdditionalTextProperties(options *TextOptions) string {
+	if options == nil {
+		return ""
+	}
+	
+	var script string
+	
+	// Font style - handle it by using fauxBold and fauxItalic
+	if options.FontStyle != "" {
+		if options.FontStyle == "Bold" || options.FontStyle == "bold" {
+			script += `
+		textDocument.fauxBold = true;`
+		} else if options.FontStyle == "Italic" || options.FontStyle == "italic" {
+			script += `
+		textDocument.fauxItalic = true;`
+		} else if options.FontStyle == "Bold Italic" || options.FontStyle == "bold italic" || options.FontStyle == "Bold-Italic" {
+			script += `
+		textDocument.fauxBold = true;
+		textDocument.fauxItalic = true;`
+		}
+		// Otherwise, use regular font weight (no need to set anything)
+	}
+	
+	// Stroke properties
+	if options.ApplyStroke != nil {
+		script += `
+		textDocument.applyStroke = ` + fmt.Sprintf("%t", *options.ApplyStroke) + `;`
+	}
+	
+	if options.StrokeColor != [3]float64{0, 0, 0} {
+		script += `
+		textDocument.strokeColor = [` + fmt.Sprintf("%f, %f, %f", options.StrokeColor[0], options.StrokeColor[1], options.StrokeColor[2]) + `];`
+	}
+	
+	if options.StrokeWidth > 0 {
+		script += `
+		textDocument.strokeWidth = ` + fmt.Sprintf("%f", options.StrokeWidth) + `;`
+	}
+	
+	// Text styling
+	if options.FauxBold != nil {
+		script += `
+		textDocument.fauxBold = ` + fmt.Sprintf("%t", *options.FauxBold) + `;`
+	}
+	
+	if options.FauxItalic != nil {
+		script += `
+		textDocument.fauxItalic = ` + fmt.Sprintf("%t", *options.FauxItalic) + `;`
+	}
+	
+	if options.AllCaps != nil {
+		script += `
+		textDocument.allCaps = ` + fmt.Sprintf("%t", *options.AllCaps) + `;`
+	}
+	
+	if options.SmallCaps != nil {
+		script += `
+		textDocument.smallCaps = ` + fmt.Sprintf("%t", *options.SmallCaps) + `;`
+	}
+	
+	if options.Leading > 0 {
+		script += `
+		textDocument.leading = ` + fmt.Sprintf("%f", options.Leading) + `;`
+	}
+	
+	return script
 }
 
 // ModifyTextLayer modifies an existing text layer in a composition
@@ -184,7 +304,7 @@ func ModifyTextLayer(compName string, layerName string, modifications TextModifi
 		}
 		
 		// Check if this is actually a text layer
-		if (!(textLayer.property("Source Text") instanceof TextProperty)) {
+		if (!textLayer.property("Source Text")) {
 			return JSON.stringify({
 				error: "Layer is not a text layer: " + layerName
 			});
@@ -219,7 +339,40 @@ func ModifyTextLayer(compName string, layerName string, modifications TextModifi
 		modified = true;
 		`
 	}
+	
+	// Handle fontFamily as an alias for font
+	if fontFamily, ok := modifications["fontFamily"].(string); ok {
+		script += `
+		textDocument.font = "` + fontFamily + `";
+		modified = true;
+		`
+	}
+	
+	// Handle fontStyle by converting it to fauxBold and fauxItalic
+	if fontStyle, ok := modifications["fontStyle"].(string); ok {
+		// Instead of trying to set read-only fontStyle property directly,
+		// we use fauxBold and fauxItalic based on the style name
+		if fontStyle == "Bold" || fontStyle == "bold" {
+			script += `
+			textDocument.fauxBold = true;
+			modified = true;
+			`
+		} else if fontStyle == "Italic" || fontStyle == "italic" {
+			script += `
+			textDocument.fauxItalic = true;
+			modified = true;
+			`
+		} else if fontStyle == "Bold Italic" || fontStyle == "bold italic" || fontStyle == "Bold-Italic" {
+			script += `
+			textDocument.fauxBold = true;
+			textDocument.fauxItalic = true;
+			modified = true;
+			`
+		}
+		// Otherwise, do nothing as we can't directly set fontStyle
+	}
 
+	// Handle color object or fillColor
 	if color, ok := modifications["color"].([]interface{}); ok && len(color) >= 3 {
 		r, _ := color[0].(float64)
 		g, _ := color[1].(float64)
@@ -229,10 +382,59 @@ func ModifyTextLayer(compName string, layerName string, modifications TextModifi
 		modified = true;
 		`
 	}
+	
+	if fillColor, ok := modifications["fillColor"].(ColorRGB); ok {
+		script += `
+		textDocument.fillColor = [` + fmt.Sprintf("%f, %f, %f", fillColor[0], fillColor[1], fillColor[2]) + `];
+		modified = true;
+		`
+	}
+	
+	// Handle applyFill
+	if applyFill, ok := modifications["applyFill"].(bool); ok {
+		script += `
+		textDocument.applyFill = ` + fmt.Sprintf("%t", applyFill) + `;
+		modified = true;
+		`
+	}
+	
+	// Handle stroke properties
+	if applyStroke, ok := modifications["applyStroke"].(bool); ok {
+		script += `
+		textDocument.applyStroke = ` + fmt.Sprintf("%t", applyStroke) + `;
+		modified = true;
+		`
+	}
+	
+	if strokeColor, ok := modifications["strokeColor"].(ColorRGB); ok {
+		script += `
+		textDocument.strokeColor = [` + fmt.Sprintf("%f, %f, %f", strokeColor[0], strokeColor[1], strokeColor[2]) + `];
+		modified = true;
+		`
+	}
+	
+	if strokeWidth, ok := modifications["strokeWidth"].(float64); ok {
+		script += `
+		textDocument.strokeWidth = ` + fmt.Sprintf("%f", strokeWidth) + `;
+		modified = true;
+		`
+	}
 
 	if justification, ok := modifications["justification"].(string); ok {
+		// Make sure the justification has _JUSTIFY suffix
+		var justificationValue string
+		if justification == "LEFT" {
+			justificationValue = "LEFT_JUSTIFY"
+		} else if justification == "CENTER" {
+			justificationValue = "CENTER_JUSTIFY"
+		} else if justification == "RIGHT" {
+			justificationValue = "RIGHT_JUSTIFY"
+		} else {
+			justificationValue = justification
+		}
+		
 		script += `
-		textDocument.justification = ParagraphJustification.` + justification + `;
+		textDocument.justification = ParagraphJustification.` + justificationValue + `;
 		modified = true;
 		`
 	}
@@ -242,6 +444,51 @@ func ModifyTextLayer(compName string, layerName string, modifications TextModifi
 		y, _ := position[1].(float64)
 		script += `
 		textLayer.position.setValue([` + fmt.Sprintf("%f, %f, 0", x, y) + `]);
+		modified = true;
+		`
+	}
+	
+	// Handle tracking (letter spacing)
+	if tracking, ok := modifications["tracking"].(float64); ok {
+		script += `
+		textDocument.tracking = ` + fmt.Sprintf("%f", tracking) + `;
+		modified = true;
+		`
+	}
+	
+	// Handle leading (line spacing)
+	if leading, ok := modifications["leading"].(float64); ok {
+		script += `
+		textDocument.leading = ` + fmt.Sprintf("%f", leading) + `;
+		modified = true;
+		`
+	}
+	
+	// Handle text styling options
+	if fauxBold, ok := modifications["fauxBold"].(bool); ok {
+		script += `
+		textDocument.fauxBold = ` + fmt.Sprintf("%t", fauxBold) + `;
+		modified = true;
+		`
+	}
+	
+	if fauxItalic, ok := modifications["fauxItalic"].(bool); ok {
+		script += `
+		textDocument.fauxItalic = ` + fmt.Sprintf("%t", fauxItalic) + `;
+		modified = true;
+		`
+	}
+	
+	if allCaps, ok := modifications["allCaps"].(bool); ok {
+		script += `
+		textDocument.allCaps = ` + fmt.Sprintf("%t", allCaps) + `;
+		modified = true;
+		`
+	}
+	
+	if smallCaps, ok := modifications["smallCaps"].(bool); ok {
+		script += `
+		textDocument.smallCaps = ` + fmt.Sprintf("%t", smallCaps) + `;
 		modified = true;
 		`
 	}
@@ -257,6 +504,7 @@ func ModifyTextLayer(compName string, layerName string, modifications TextModifi
 		var result = {
 			name: textLayer.name,
 			index: textLayer.index,
+			id: textLayer.index,
 			text: textDocument.text,
 			fontSize: textDocument.fontSize,
 			fontName: textDocument.font

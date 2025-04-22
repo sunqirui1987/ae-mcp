@@ -15,11 +15,15 @@ type add_solid_layer struct {
 	server.ToolApp
 	*MCPApp
 }
-type create_composition struct {
+type add_text_layer struct {
 	server.ToolApp
 	*MCPApp
 }
-type get_composition_details struct {
+type apply_effect struct {
+	server.ToolApp
+	*MCPApp
+}
+type create_composition struct {
 	server.ToolApp
 	*MCPApp
 }
@@ -30,7 +34,15 @@ type modify_layer struct {
 	server.ToolApp
 	*MCPApp
 }
+type modify_text struct {
+	server.ToolApp
+	*MCPApp
+}
 type project struct {
+	server.ToolApp
+	*MCPApp
+}
+type script struct {
 	server.ToolApp
 	*MCPApp
 }
@@ -41,7 +53,7 @@ func (this *MCPApp) MainEntry() {
 	this.Server("After Effects MCP Tool Suite 🚀", "1.0.0")
 }
 func (this *MCPApp) Main() {
-	server.Gopt_MCPApp_Main(this, nil, []server.ToolProto{new(add_solid_layer), new(create_composition), new(get_composition_details), new(modify_layer), new(project)}, nil)
+	server.Gopt_MCPApp_Main(this, nil, []server.ToolProto{new(add_solid_layer), new(add_text_layer), new(apply_effect), new(create_composition), new(modify_layer), new(modify_text), new(project), new(script)}, nil)
 }
 //line cmd/ae-mcp/add_solid_layer_tool.gox:6
 // Tool for adding solid color layers
@@ -150,10 +162,291 @@ func (this *add_solid_layer) Classclone() server.ToolProto {
 	_gop_ret := *this
 	return &_gop_ret
 }
+//line cmd/ae-mcp/add_text_layer_tool.gox:6
+// Tool for adding text layers
+func (this *add_text_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/add_solid_layer_tool.gox:75:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/add_text_layer_tool.gox:7:1
+	this.Tool("ae_add_text_layer", func() {
+//line cmd/ae-mcp/add_text_layer_tool.gox:8:1
+		this.Description("Add a text layer to a composition")
+//line cmd/ae-mcp/add_text_layer_tool.gox:9:1
+		this.String("composition_name", func() {
+//line cmd/ae-mcp/add_text_layer_tool.gox:10:1
+			this.Description("Name of the composition to add the layer to")
+//line cmd/ae-mcp/add_text_layer_tool.gox:11:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_text_layer_tool.gox:13:1
+		this.String("layer_name", func() {
+//line cmd/ae-mcp/add_text_layer_tool.gox:14:1
+			this.Description("Name of the new text layer")
+//line cmd/ae-mcp/add_text_layer_tool.gox:15:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_text_layer_tool.gox:17:1
+		this.String("text", func() {
+//line cmd/ae-mcp/add_text_layer_tool.gox:18:1
+			this.Description("Text content")
+//line cmd/ae-mcp/add_text_layer_tool.gox:19:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_text_layer_tool.gox:21:1
+		this.Object("options", func() {
+//line cmd/ae-mcp/add_text_layer_tool.gox:22:1
+			this.Description("Text options (fontSize, fontName, color, position, justification, etc.)")
+		})
+	})
+//line cmd/ae-mcp/add_text_layer_tool.gox:27:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/add_text_layer_tool.gox:28:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/add_text_layer_tool.gox:29:1
+	textContent := this.Gop_Env("text").(string)
+//line cmd/ae-mcp/add_text_layer_tool.gox:31:1
+	// Convert text options if provided
+	var textOptions *tools.TextOptions
+//line cmd/ae-mcp/add_text_layer_tool.gox:33:1
+	if this.Gop_Env("options") != nil {
+//line cmd/ae-mcp/add_text_layer_tool.gox:34:1
+		optionsMap := this.Gop_Env("options").(map[string]interface{})
+//line cmd/ae-mcp/add_text_layer_tool.gox:37:1
+		textOptions = &tools.TextOptions{}
+//line cmd/ae-mcp/add_text_layer_tool.gox:40:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:40:1
+		fontSize, ok := optionsMap["fontSize"].(float64); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:41:1
+			textOptions.FontSize = fontSize
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:45:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:45:1
+		fontName, ok := optionsMap["fontName"].(string); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:46:1
+			textOptions.FontName = fontName
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:48:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:48:1
+		fontFamily, ok := optionsMap["fontFamily"].(string); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:49:1
+			textOptions.FontFamily = fontFamily
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:53:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:53:1
+		color, ok := optionsMap["color"].([]interface{}); ok && len(color) >= 3 {
+//line cmd/ae-mcp/add_text_layer_tool.gox:54:1
+			r, _ := color[0].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:55:1
+			g, _ := color[1].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:56:1
+			b, _ := color[2].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:57:1
+			textOptions.Color = tools.ColorRGB{r, g, b}
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:59:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:59:1
+		fillColor, ok := optionsMap["fillColor"].([]interface{}); ok && len(fillColor) >= 3 {
+//line cmd/ae-mcp/add_text_layer_tool.gox:60:1
+			r, _ := fillColor[0].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:61:1
+			g, _ := fillColor[1].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:62:1
+			b, _ := fillColor[2].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:63:1
+			textOptions.FillColor = tools.ColorRGB{r, g, b}
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:65:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:65:1
+		strokeColor, ok := optionsMap["strokeColor"].([]interface{}); ok && len(strokeColor) >= 3 {
+//line cmd/ae-mcp/add_text_layer_tool.gox:66:1
+			r, _ := strokeColor[0].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:67:1
+			g, _ := strokeColor[1].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:68:1
+			b, _ := strokeColor[2].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:69:1
+			textOptions.StrokeColor = tools.ColorRGB{r, g, b}
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:73:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:73:1
+		position, ok := optionsMap["position"].([]interface{}); ok && len(position) >= 2 {
+//line cmd/ae-mcp/add_text_layer_tool.gox:74:1
+			x, _ := position[0].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:75:1
+			y, _ := position[1].(float64)
+//line cmd/ae-mcp/add_text_layer_tool.gox:76:1
+			textOptions.Position = [2]float64{x, y}
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:80:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:80:1
+		justification, ok := optionsMap["justification"].(string); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:81:1
+			textOptions.Justification = justification
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:83:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:83:1
+		strokeWidth, ok := optionsMap["strokeWidth"].(float64); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:84:1
+			textOptions.StrokeWidth = strokeWidth
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:86:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:86:1
+		tracking, ok := optionsMap["tracking"].(float64); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:87:1
+			textOptions.Tracking = tracking
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:89:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:89:1
+		leading, ok := optionsMap["leading"].(float64); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:90:1
+			textOptions.Leading = leading
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:94:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:94:1
+		applyFill, ok := optionsMap["applyFill"].(bool); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:95:1
+			textOptions.ApplyFill = &applyFill
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:97:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:97:1
+		applyStroke, ok := optionsMap["applyStroke"].(bool); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:98:1
+			textOptions.ApplyStroke = &applyStroke
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:100:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:100:1
+		fauxBold, ok := optionsMap["fauxBold"].(bool); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:101:1
+			textOptions.FauxBold = &fauxBold
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:103:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:103:1
+		fauxItalic, ok := optionsMap["fauxItalic"].(bool); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:104:1
+			textOptions.FauxItalic = &fauxItalic
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:106:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:106:1
+		allCaps, ok := optionsMap["allCaps"].(bool); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:107:1
+			textOptions.AllCaps = &allCaps
+		}
+//line cmd/ae-mcp/add_text_layer_tool.gox:109:1
+		if
+//line cmd/ae-mcp/add_text_layer_tool.gox:109:1
+		smallCaps, ok := optionsMap["smallCaps"].(bool); ok {
+//line cmd/ae-mcp/add_text_layer_tool.gox:110:1
+			textOptions.SmallCaps = &smallCaps
+		}
+	}
+//line cmd/ae-mcp/add_text_layer_tool.gox:114:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/add_text_layer_tool.gox:116:1
+	var err error
+//line cmd/ae-mcp/add_text_layer_tool.gox:117:1
+	result, err = tools.AddTextLayer(compName, layerName, textContent, textOptions)
+//line cmd/ae-mcp/add_text_layer_tool.gox:118:1
+	if err != nil {
+//line cmd/ae-mcp/add_text_layer_tool.gox:119:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/add_text_layer_tool.gox:123:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *add_text_layer) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
+//line cmd/ae-mcp/apply_effect_tool.gox:6
+// Tool for applying effects to layers
+func (this *apply_effect) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/add_text_layer_tool.gox:123:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/apply_effect_tool.gox:7:1
+	this.Tool("ae_apply_effect", func() {
+//line cmd/ae-mcp/apply_effect_tool.gox:8:1
+		this.Description("Apply an effect to a layer in a composition")
+//line cmd/ae-mcp/apply_effect_tool.gox:9:1
+		this.String("composition_name", func() {
+//line cmd/ae-mcp/apply_effect_tool.gox:10:1
+			this.Description("Name of the composition containing the layer")
+//line cmd/ae-mcp/apply_effect_tool.gox:11:1
+			this.Required()
+		})
+//line cmd/ae-mcp/apply_effect_tool.gox:13:1
+		this.String("layer_name", func() {
+//line cmd/ae-mcp/apply_effect_tool.gox:14:1
+			this.Description("Name of the layer to apply the effect to")
+//line cmd/ae-mcp/apply_effect_tool.gox:15:1
+			this.Required()
+		})
+//line cmd/ae-mcp/apply_effect_tool.gox:17:1
+		this.String("effect_name", func() {
+//line cmd/ae-mcp/apply_effect_tool.gox:18:1
+			this.Description("Name of the effect to apply (e.g. 'Blur', 'Color Correction', etc.)")
+//line cmd/ae-mcp/apply_effect_tool.gox:19:1
+			this.Required()
+		})
+//line cmd/ae-mcp/apply_effect_tool.gox:21:1
+		this.Object("parameters", func() {
+//line cmd/ae-mcp/apply_effect_tool.gox:22:1
+			this.Description("Effect parameters to set (specific to the effect type)")
+		})
+	})
+//line cmd/ae-mcp/apply_effect_tool.gox:27:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/apply_effect_tool.gox:28:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/apply_effect_tool.gox:29:1
+	effectName := this.Gop_Env("effect_name").(string)
+//line cmd/ae-mcp/apply_effect_tool.gox:31:1
+	// Convert effect parameters if provided
+	var effectParams tools.EffectParameters
+//line cmd/ae-mcp/apply_effect_tool.gox:33:1
+	if this.Gop_Env("parameters") != nil {
+//line cmd/ae-mcp/apply_effect_tool.gox:34:1
+		effectParams = this.Gop_Env("parameters").(map[string]interface{})
+	}
+//line cmd/ae-mcp/apply_effect_tool.gox:37:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/apply_effect_tool.gox:39:1
+	var err error
+//line cmd/ae-mcp/apply_effect_tool.gox:40:1
+	result, err = tools.ApplyEffect(compName, layerName, effectName, effectParams)
+//line cmd/ae-mcp/apply_effect_tool.gox:41:1
+	if err != nil {
+//line cmd/ae-mcp/apply_effect_tool.gox:42:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/apply_effect_tool.gox:46:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *apply_effect) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
 //line cmd/ae-mcp/create_composition_tool.gox:6
 // Tool for creating new compositions
 func (this *create_composition) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/add_solid_layer_tool.gox:75:1
+//line cmd/ae-mcp/apply_effect_tool.gox:46:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/create_composition_tool.gox:7:1
 	this.Tool("ae_create_composition", func() {
@@ -242,48 +535,10 @@ func (this *create_composition) Classclone() server.ToolProto {
 	_gop_ret := *this
 	return &_gop_ret
 }
-//line cmd/ae-mcp/get_composition_details_tool.gox:6
-// Tool for getting composition details
-func (this *get_composition_details) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/create_composition_tool.gox:63:1
-	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
-//line cmd/ae-mcp/get_composition_details_tool.gox:7:1
-	this.Tool("ae_get_composition_details", func() {
-//line cmd/ae-mcp/get_composition_details_tool.gox:8:1
-		this.Description("Get detailed information about a specific composition")
-//line cmd/ae-mcp/get_composition_details_tool.gox:9:1
-		this.String("composition_name", func() {
-//line cmd/ae-mcp/get_composition_details_tool.gox:10:1
-			this.Description("Name of the composition to get details for")
-//line cmd/ae-mcp/get_composition_details_tool.gox:11:1
-			this.Required()
-		})
-	})
-//line cmd/ae-mcp/get_composition_details_tool.gox:16:1
-	compName := this.Gop_Env("composition_name").(string)
-//line cmd/ae-mcp/get_composition_details_tool.gox:18:1
-	// Call the implementation in golang
-	var result map[string]interface{}
-//line cmd/ae-mcp/get_composition_details_tool.gox:20:1
-	var err error
-//line cmd/ae-mcp/get_composition_details_tool.gox:21:1
-	result, err = tools.GetCompositionDetails(compName)
-//line cmd/ae-mcp/get_composition_details_tool.gox:22:1
-	if err != nil {
-//line cmd/ae-mcp/get_composition_details_tool.gox:23:1
-		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
-	}
-//line cmd/ae-mcp/get_composition_details_tool.gox:27:1
-	return server.Text__1(server.JsonContent{JSON: result})
-}
-func (this *get_composition_details) Classclone() server.ToolProto {
-	_gop_ret := *this
-	return &_gop_ret
-}
 //line cmd/ae-mcp/modify_layer_tool.gox:6
 // Tool for modifying layer properties
 func (this *modify_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/get_composition_details_tool.gox:27:1
+//line cmd/ae-mcp/create_composition_tool.gox:63:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/modify_layer_tool.gox:7:1
 	this.Tool("ae_modify_layer", func() {
@@ -362,10 +617,66 @@ func (this *modify_layer) Classclone() server.ToolProto {
 	_gop_ret := *this
 	return &_gop_ret
 }
+//line cmd/ae-mcp/modify_text_tool.gox:6
+// Tool for modifying text layers
+func (this *modify_text) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/modify_layer_tool.gox:53:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/modify_text_tool.gox:7:1
+	this.Tool("ae_modify_text_layer", func() {
+//line cmd/ae-mcp/modify_text_tool.gox:8:1
+		this.Description("Modify an existing text layer in a composition")
+//line cmd/ae-mcp/modify_text_tool.gox:9:1
+		this.String("composition_name", func() {
+//line cmd/ae-mcp/modify_text_tool.gox:10:1
+			this.Description("Name of the composition containing the text layer")
+//line cmd/ae-mcp/modify_text_tool.gox:11:1
+			this.Required()
+		})
+//line cmd/ae-mcp/modify_text_tool.gox:13:1
+		this.String("layer_name", func() {
+//line cmd/ae-mcp/modify_text_tool.gox:14:1
+			this.Description("Name of the text layer to modify")
+//line cmd/ae-mcp/modify_text_tool.gox:15:1
+			this.Required()
+		})
+//line cmd/ae-mcp/modify_text_tool.gox:17:1
+		this.Object("modifications", func() {
+//line cmd/ae-mcp/modify_text_tool.gox:18:1
+			this.Description("Text properties to modify (text, fontSize, fontName, color, etc.)")
+//line cmd/ae-mcp/modify_text_tool.gox:19:1
+			this.Required()
+		})
+	})
+//line cmd/ae-mcp/modify_text_tool.gox:24:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/modify_text_tool.gox:25:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/modify_text_tool.gox:26:1
+	modifications := this.Gop_Env("modifications").(map[string]interface{})
+//line cmd/ae-mcp/modify_text_tool.gox:28:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/modify_text_tool.gox:30:1
+	var err error
+//line cmd/ae-mcp/modify_text_tool.gox:31:1
+	result, err = tools.ModifyTextLayer(compName, layerName, modifications)
+//line cmd/ae-mcp/modify_text_tool.gox:32:1
+	if err != nil {
+//line cmd/ae-mcp/modify_text_tool.gox:33:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/modify_text_tool.gox:37:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *modify_text) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
 //line cmd/ae-mcp/project_tool.gox:6
 // Tool for getting project information
 func (this *project) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/modify_layer_tool.gox:53:1
+//line cmd/ae-mcp/modify_text_tool.gox:37:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/project_tool.gox:7:1
 	this.Tool("ae_get_project_info", func() {
@@ -391,7 +702,59 @@ func (this *project) Classclone() server.ToolProto {
 	_gop_ret := *this
 	return &_gop_ret
 }
-func main() {
+//line cmd/ae-mcp/script_tool.gox:9
+// Tool for executing JavaScript code in After Effects
+// The After Effects Object Model provides programmatic access to the entire AE application structure:
+// - Application object (app): The global entry point to access AE settings and objects
+// - Project: Represents an AE project containing compositions, items, and render queue
+// - CompItem: Represents compositions that contain layers and can be rendered
+// - Layer objects: Various types (AVLayer, CameraLayer, LightLayer, ShapeLayer, TextLayer)
+// - Property objects: Represent AE properties on layers that can be animated with keyframes
+// - RenderQueue: Controls rendering operations and output modules
+// - Sources: Represent different types of footage (files, placeholders, solids)
+//
+// The hierarchy follows the UI structure: Application contains Projects, which contain
+// Compositions with Layers, which have Properties containing Markers and Keyframes.
+// The RenderQueue contains render settings and output modules.
+//
+// For complete documentation, refer to: https://ae-scripting.docsforadobe.dev/
+func (this *script) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
 //line cmd/ae-mcp/project_tool.gox:22:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/script_tool.gox:24:1
+	this.Tool("ae_execute_script", func() {
+//line cmd/ae-mcp/script_tool.gox:25:1
+		this.Description("Execute arbitrary JavaScript code in After Effects to interact with any object in the AE object model hierarchy including: Application, Project, Items (Compositions, Footage, Folders), Layers (AV, Camera, Light, Shape, Text), Properties, RenderQueue, Sources, and more. Scripts have full access to create, modify, and automate all aspects of After Effects projects. Full documentation: https://ae-scripting.docsforadobe.dev/")
+//line cmd/ae-mcp/script_tool.gox:26:1
+		this.String("script", func() {
+//line cmd/ae-mcp/script_tool.gox:27:1
+			this.Description("JavaScript code to execute. Can use the entire After Effects scripting object model including: app (Application), app.project (Project), CompItem, Layer objects, Property objects, and utility functions for time conversion and debugging. See https://ae-scripting.docsforadobe.dev/ for complete reference.")
+//line cmd/ae-mcp/script_tool.gox:28:1
+			this.Required()
+		})
+	})
+//line cmd/ae-mcp/script_tool.gox:33:1
+	scriptCode := this.Gop_Env("script").(string)
+//line cmd/ae-mcp/script_tool.gox:35:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/script_tool.gox:37:1
+	var err error
+//line cmd/ae-mcp/script_tool.gox:38:1
+	result, err = tools.ExecuteScript(scriptCode)
+//line cmd/ae-mcp/script_tool.gox:39:1
+	if err != nil {
+//line cmd/ae-mcp/script_tool.gox:40:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/script_tool.gox:44:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *script) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
+func main() {
+//line cmd/ae-mcp/script_tool.gox:44:1
 	new(MCPApp).Main()
 }

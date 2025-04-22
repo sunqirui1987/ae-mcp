@@ -55,8 +55,8 @@ func AddSolidLayer(compositionName string, layerName string, color ColorRGB, wid
 		if (width <= 0) width = comp.width;
 		if (height <= 0) height = comp.height;
 		
-		// Create solid
-		var solidItem = project.items.addSolid(
+		// Create solid layer directly in the composition
+		var layer = comp.layers.addSolid(
 			color,               // color array [r, g, b]
 			layerName,           // name
 			width,               // width
@@ -64,9 +64,6 @@ func AddSolidLayer(compositionName string, layerName string, color ColorRGB, wid
 			1,                   // pixel aspect ratio
 			comp.duration        // duration (seconds)
 		);
-		
-		// Add solid to comp
-		var layer = comp.layers.add(solidItem);
 		
 		// Set 3D if specified
 		if (is3D) {
@@ -274,4 +271,4 @@ func ModifyLayer(compositionName string, layerIdentifier LayerIdentifier, proper
 	}
 
 	return nil, ErrInvalidResponse
-} 
+}
