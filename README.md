@@ -20,16 +20,18 @@ A powerful, extensible Model Context Protocol (MCP) integration for Adobe After 
 
 Check out the demo video below to see the integration in action:
 
-<!-- Method 3: HTML video tag (works in some markdown renderers) -->
-<video src="https://github.com/sunqirui1987/ae-mcp/raw/main/docs/数学形状演示.mp4" controls="controls" style="max-width: 730px;">
-</video>
+
+<!-- Method 2: Thumbnail with link to video -->
+[![After Effects MCP Demo](docs/video.png)](https://github.com/sunqirui1987/ae-mcp/raw/main/docs/数学形状演示.mp4 "Click to watch the demo")
+
+
 
 ## ✨ Features
 
 - **Extensible Architecture**: Easily add new tools through configuration files
 - **Rich After Effects Functionality**: Control compositions, layers, effects, and more
 - **MCP Compliant**: Works with any MCP-compatible AI model, including Claude
-- **Simple API**: Intuitive commands for AI control of After Effects
+
 
 ## 🛠️ Tools
 
@@ -37,11 +39,15 @@ This integration provides a comprehensive set of tools for After Effects:
 
 | Category | Capabilities |
 |----------|-------------|
-| **Project Management** | Get project information, manage assets |
-| **Compositions** | Create, query, and modify compositions |
-| **Layers** | Add and modify layers (solids, text, shape, etc.) |
-| **Effects** | Apply and manage effects with customizable parameters |
-| **Animation** | Control keyframes and animation properties |
+| **Project** | Get project information, list compositions, manage project properties |
+| **Compositions** | Create new compositions with custom dimensions, frame rates, and durations |
+| **Text Layers** | Add and modify text layers with font controls, tracking, justification, colors, and styling |
+| **Solid Layers** | Create solid layers with custom colors, dimensions, and 3D properties |
+| **Layer Properties** | Set position, scale, rotation, opacity, and other transformation properties |
+| **Effects** | Apply effects to layers with customizable parameters |
+| **Scripting** | Execute arbitrary ExtendScript code for advanced customization |
+
+Each tool implements After Effects functionality via ExtendScript and exposes a clean Go API that follows the MCP specification.
 
 ## 🚀 Getting Started
 
