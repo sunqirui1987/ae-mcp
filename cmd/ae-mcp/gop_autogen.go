@@ -11,6 +11,22 @@ import (
 
 const _ = true
 
+type add_camera_layer struct {
+	server.ToolApp
+	*MCPApp
+}
+type add_custom_shape_layer struct {
+	server.ToolApp
+	*MCPApp
+}
+type add_light_layer struct {
+	server.ToolApp
+	*MCPApp
+}
+type add_preset_shape_layer struct {
+	server.ToolApp
+	*MCPApp
+}
 type add_solid_layer struct {
 	server.ToolApp
 	*MCPApp
@@ -24,6 +40,14 @@ type apply_effect struct {
 	*MCPApp
 }
 type create_composition struct {
+	server.ToolApp
+	*MCPApp
+}
+type get_effect_categories struct {
+	server.ToolApp
+	*MCPApp
+}
+type get_effects_by_category struct {
 	server.ToolApp
 	*MCPApp
 }
@@ -53,11 +77,318 @@ func (this *MCPApp) MainEntry() {
 	this.Server("After Effects MCP Tool Suite 🚀", "1.0.0")
 }
 func (this *MCPApp) Main() {
-	server.Gopt_MCPApp_Main(this, nil, []server.ToolProto{new(add_solid_layer), new(add_text_layer), new(apply_effect), new(create_composition), new(modify_layer), new(modify_text), new(project), new(script)}, nil)
+	server.Gopt_MCPApp_Main(this, nil, []server.ToolProto{new(add_camera_layer), new(add_custom_shape_layer), new(add_light_layer), new(add_preset_shape_layer), new(add_solid_layer), new(add_text_layer), new(apply_effect), new(create_composition), new(get_effect_categories), new(get_effects_by_category), new(modify_layer), new(modify_text), new(project), new(script)}, nil)
+}
+//line cmd/ae-mcp/add_camera_layer_tool.gox:6
+// Tool for adding camera layers
+func (this *add_camera_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/add_camera_layer_tool.gox:7:1
+	this.Tool("ae_add_camera_layer", func() {
+//line cmd/ae-mcp/add_camera_layer_tool.gox:8:1
+		this.Description("Add a camera layer to a composition")
+//line cmd/ae-mcp/add_camera_layer_tool.gox:9:1
+		this.String("composition_name", func() {
+//line cmd/ae-mcp/add_camera_layer_tool.gox:10:1
+			this.Description("Name of the composition to add the layer to")
+//line cmd/ae-mcp/add_camera_layer_tool.gox:11:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_camera_layer_tool.gox:13:1
+		this.String("layer_name", func() {
+//line cmd/ae-mcp/add_camera_layer_tool.gox:14:1
+			this.Description("Name of the new camera layer")
+//line cmd/ae-mcp/add_camera_layer_tool.gox:15:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_camera_layer_tool.gox:17:1
+		this.String("camera_type", func() {
+//line cmd/ae-mcp/add_camera_layer_tool.gox:18:1
+			this.Description("Type of camera (One-Node Camera, Two-Node Camera)")
+		})
+	})
+//line cmd/ae-mcp/add_camera_layer_tool.gox:23:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/add_camera_layer_tool.gox:24:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/add_camera_layer_tool.gox:27:1
+	cameraType := ""
+//line cmd/ae-mcp/add_camera_layer_tool.gox:28:1
+	if this.Gop_Env("camera_type") != nil {
+//line cmd/ae-mcp/add_camera_layer_tool.gox:29:1
+		cameraType = this.Gop_Env("camera_type").(string)
+	}
+//line cmd/ae-mcp/add_camera_layer_tool.gox:32:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/add_camera_layer_tool.gox:34:1
+	var err error
+//line cmd/ae-mcp/add_camera_layer_tool.gox:35:1
+	result, err = tools.AddCameraLayer(compName, layerName, cameraType)
+//line cmd/ae-mcp/add_camera_layer_tool.gox:36:1
+	if err != nil {
+//line cmd/ae-mcp/add_camera_layer_tool.gox:37:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/add_camera_layer_tool.gox:41:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *add_camera_layer) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:6
+// Tool for adding custom shape layers
+func (this *add_custom_shape_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/add_camera_layer_tool.gox:41:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:7:1
+	this.Tool("mcp_aftereffects_ae_add_custom_shape_layer", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:8:1
+		this.Description("Add a custom shape layer to a composition with specified vertices and properties")
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:9:1
+		this.String("composition_name", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:10:1
+			this.Description("Name of the composition to add the layer to")
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:11:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:13:1
+		this.String("layer_name", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:14:1
+			this.Description("Name of the new shape layer")
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:15:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:17:1
+		this.Array("vertices", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:18:1
+			this.Description("Array of points defining the shape's vertices as [[x1,y1], [x2,y2], ...]")
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:19:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:21:1
+		this.Bool("closed", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:22:1
+			this.Description("Whether the shape is closed (connects first and last vertices)")
+		})
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:24:1
+		this.Array("in_tangents", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:25:1
+			this.Description("Array of incoming tangent points as [[x1,y1], [x2,y2], ...] (must match vertices length)")
+		})
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:27:1
+		this.Array("out_tangents", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:28:1
+			this.Description("Array of outgoing tangent points as [[x1,y1], [x2,y2], ...] (must match vertices length)")
+		})
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:30:1
+		this.Array("feather_radii", func() {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:31:1
+			this.Description("Array of feather point radii (optional, for mask feathering)")
+		})
+	})
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:36:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:37:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:40:1
+	args := map[string]interface{}{"composition_name": compName, "layer_name": layerName, "vertices": this.Gop_Env("vertices").([]interface{})}
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:47:1
+	if this.Gop_Env("closed") != nil {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:48:1
+		args["closed"] = this.Gop_Env("closed").(bool)
+	}
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:51:1
+	if this.Gop_Env("in_tangents") != nil {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:52:1
+		args["in_tangents"] = this.Gop_Env("in_tangents").([]interface{})
+	}
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:55:1
+	if this.Gop_Env("out_tangents") != nil {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:56:1
+		args["out_tangents"] = this.Gop_Env("out_tangents").([]interface{})
+	}
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:59:1
+	if this.Gop_Env("feather_radii") != nil {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:60:1
+		args["feather_radii"] = this.Gop_Env("feather_radii").([]interface{})
+	}
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:64:1
+	result, err := tools.MCPAddCustomShapeLayer(args)
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:65:1
+	if err != nil {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:66:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:70:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *add_custom_shape_layer) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
+//line cmd/ae-mcp/add_light_layer_tool.gox:6
+// Tool for adding light layers
+func (this *add_light_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/add_custom_shape_layer_tool.gox:70:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/add_light_layer_tool.gox:7:1
+	this.Tool("ae_add_light_layer", func() {
+//line cmd/ae-mcp/add_light_layer_tool.gox:8:1
+		this.Description("Add a light layer to a composition")
+//line cmd/ae-mcp/add_light_layer_tool.gox:9:1
+		this.String("composition_name", func() {
+//line cmd/ae-mcp/add_light_layer_tool.gox:10:1
+			this.Description("Name of the composition to add the layer to")
+//line cmd/ae-mcp/add_light_layer_tool.gox:11:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_light_layer_tool.gox:13:1
+		this.String("layer_name", func() {
+//line cmd/ae-mcp/add_light_layer_tool.gox:14:1
+			this.Description("Name of the new light layer")
+//line cmd/ae-mcp/add_light_layer_tool.gox:15:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_light_layer_tool.gox:17:1
+		this.String("light_type", func() {
+//line cmd/ae-mcp/add_light_layer_tool.gox:18:1
+			this.Description("Type of light (Parallel, Spot, Point, Ambient)")
+		})
+//line cmd/ae-mcp/add_light_layer_tool.gox:20:1
+		this.Array("color", func() {
+//line cmd/ae-mcp/add_light_layer_tool.gox:21:1
+			this.Description("RGB color array [R, G, B], with values ranging from 0-1")
+//line cmd/ae-mcp/add_light_layer_tool.gox:22:1
+			this.Required()
+		})
+	})
+//line cmd/ae-mcp/add_light_layer_tool.gox:27:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/add_light_layer_tool.gox:28:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/add_light_layer_tool.gox:31:1
+	lightType := ""
+//line cmd/ae-mcp/add_light_layer_tool.gox:32:1
+	if this.Gop_Env("light_type") != nil {
+//line cmd/ae-mcp/add_light_layer_tool.gox:33:1
+		lightType = this.Gop_Env("light_type").(string)
+	}
+//line cmd/ae-mcp/add_light_layer_tool.gox:37:1
+	colorArray := this.Gop_Env("color").([]interface{})
+//line cmd/ae-mcp/add_light_layer_tool.gox:38:1
+	var colorVal [3]float64
+//line cmd/ae-mcp/add_light_layer_tool.gox:41:1
+	if len(colorArray) >= 3 {
+//line cmd/ae-mcp/add_light_layer_tool.gox:42:1
+		r, _ := colorArray[0].(float64)
+//line cmd/ae-mcp/add_light_layer_tool.gox:43:1
+		g, _ := colorArray[1].(float64)
+//line cmd/ae-mcp/add_light_layer_tool.gox:44:1
+		b, _ := colorArray[2].(float64)
+//line cmd/ae-mcp/add_light_layer_tool.gox:45:1
+		colorVal = [3]float64{r, g, b}
+	} else {
+//line cmd/ae-mcp/add_light_layer_tool.gox:47:1
+		colorVal = [3]float64{1.0, 1.0, 1.0}
+	}
+//line cmd/ae-mcp/add_light_layer_tool.gox:50:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/add_light_layer_tool.gox:52:1
+	var err error
+//line cmd/ae-mcp/add_light_layer_tool.gox:53:1
+	result, err = tools.AddLightLayer(compName, layerName, lightType, colorVal)
+//line cmd/ae-mcp/add_light_layer_tool.gox:54:1
+	if err != nil {
+//line cmd/ae-mcp/add_light_layer_tool.gox:55:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/add_light_layer_tool.gox:59:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *add_light_layer) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:6
+// Tool for adding preset shape layers
+func (this *add_preset_shape_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/add_light_layer_tool.gox:59:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:7:1
+	this.Tool("mcp_aftereffects_ae_add_preset_shape_layer", func() {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:8:1
+		this.Description("Add a preset shape layer (rectangle, ellipse, polygon, star) to a composition")
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:9:1
+		this.String("composition_name", func() {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:10:1
+			this.Description("Name of the composition to add the layer to")
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:11:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:13:1
+		this.String("layer_name", func() {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:14:1
+			this.Description("Name of the new shape layer")
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:15:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:17:1
+		this.String("shape_type", func() {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:18:1
+			this.Description("Type of shape to create (rectangle, ellipse, polygon, star)")
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:19:1
+			this.Required()
+		})
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:21:1
+		this.Float("width", func() {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:22:1
+			this.Description("Width of the shape in pixels (default: 100)")
+		})
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:24:1
+		this.Float("height", func() {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:25:1
+			this.Description("Height of the shape in pixels (default: 100)")
+		})
+	})
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:30:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:31:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:32:1
+	shapeType := this.Gop_Env("shape_type").(string)
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:35:1
+	args := map[string]interface{}{"composition_name": compName, "layer_name": layerName, "shape_type": shapeType}
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:42:1
+	if this.Gop_Env("width") != nil {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:43:1
+		args["width"] = this.Gop_Env("width").(float64)
+	}
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:46:1
+	if this.Gop_Env("height") != nil {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:47:1
+		args["height"] = this.Gop_Env("height").(float64)
+	}
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:51:1
+	result, err := tools.MCPAddPresetShapeLayer(args)
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:52:1
+	if err != nil {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:53:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:57:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *add_preset_shape_layer) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
 }
 //line cmd/ae-mcp/add_solid_layer_tool.gox:6
 // Tool for adding solid color layers
 func (this *add_solid_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/add_preset_shape_layer_tool.gox:57:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/add_solid_layer_tool.gox:7:1
 	this.Tool("ae_add_solid_layer", func() {
@@ -417,7 +748,7 @@ func (this *apply_effect) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallTool
 //line cmd/ae-mcp/apply_effect_tool.gox:29:1
 	effectName := this.Gop_Env("effect_name").(string)
 //line cmd/ae-mcp/apply_effect_tool.gox:31:1
-	// Convert effect parameters if provided
+	// Get optional parameters
 	var effectParams tools.EffectParameters
 //line cmd/ae-mcp/apply_effect_tool.gox:33:1
 	if this.Gop_Env("parameters") != nil {
@@ -426,7 +757,7 @@ func (this *apply_effect) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallTool
 	}
 //line cmd/ae-mcp/apply_effect_tool.gox:37:1
 	// Call the implementation in golang
-	var result map[string]interface{}
+	var result tools.EffectDetails
 //line cmd/ae-mcp/apply_effect_tool.gox:39:1
 	var err error
 //line cmd/ae-mcp/apply_effect_tool.gox:40:1
@@ -535,10 +866,72 @@ func (this *create_composition) Classclone() server.ToolProto {
 	_gop_ret := *this
 	return &_gop_ret
 }
+//line cmd/ae-mcp/get_effect_categories_tool.gox:6
+// Tool for getting available effect categories
+func (this *get_effect_categories) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/create_composition_tool.gox:63:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/get_effect_categories_tool.gox:7:1
+	this.Tool("mcp_aftereffects_ae_get_effect_categories", func() {
+//line cmd/ae-mcp/get_effect_categories_tool.gox:8:1
+		this.Description("Get a list of all available effect categories in After Effects")
+//line cmd/ae-mcp/get_effect_categories_tool.gox:9:1
+		this.String("random_string", func() {
+//line cmd/ae-mcp/get_effect_categories_tool.gox:10:1
+			this.Description("Dummy parameter for no-parameter tools")
+		})
+	})
+//line cmd/ae-mcp/get_effect_categories_tool.gox:15:1
+	result, err := tools.MCPGetEffectCategories(map[string]interface{}{})
+//line cmd/ae-mcp/get_effect_categories_tool.gox:16:1
+	if err != nil {
+//line cmd/ae-mcp/get_effect_categories_tool.gox:17:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/get_effect_categories_tool.gox:21:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *get_effect_categories) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:6
+// Tool for getting effects by category
+func (this *get_effects_by_category) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
+//line cmd/ae-mcp/get_effect_categories_tool.gox:21:1
+	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:7:1
+	this.Tool("mcp_aftereffects_ae_get_effects_by_category", func() {
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:8:1
+		this.Description("Get a list of effects in a specified category")
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:9:1
+		this.String("category", func() {
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:10:1
+			this.Description("Name of the effect category to query")
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:11:1
+			this.Required()
+		})
+	})
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:16:1
+	category := this.Gop_Env("category").(string)
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:19:1
+	result, err := tools.MCPGetEffectsByCategory(map[string]interface{}{"category": category})
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:22:1
+	if err != nil {
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:23:1
+		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
+	}
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:27:1
+	return server.Text__1(server.JsonContent{JSON: result})
+}
+func (this *get_effects_by_category) Classclone() server.ToolProto {
+	_gop_ret := *this
+	return &_gop_ret
+}
 //line cmd/ae-mcp/modify_layer_tool.gox:6
 // Tool for modifying layer properties
 func (this *modify_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/create_composition_tool.gox:63:1
+//line cmd/ae-mcp/get_effects_by_category_tool.gox:27:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/modify_layer_tool.gox:7:1
 	this.Tool("ae_modify_layer", func() {
@@ -568,49 +961,40 @@ func (this *modify_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallTool
 	})
 //line cmd/ae-mcp/modify_layer_tool.gox:24:1
 	compName := this.Gop_Env("composition_name").(string)
-//line cmd/ae-mcp/modify_layer_tool.gox:27:1
-	layerIdObj := this.Gop_Env("layer_identifier").(map[string]interface{})
+//line cmd/ae-mcp/modify_layer_tool.gox:25:1
+	layerIdentifier := this.Gop_Env("layer_identifier").(map[string]interface{})
+//line cmd/ae-mcp/modify_layer_tool.gox:26:1
+	properties := this.Gop_Env("properties").(map[string]interface{})
 //line cmd/ae-mcp/modify_layer_tool.gox:28:1
-	var layerId tools.LayerIdentifier
-//line cmd/ae-mcp/modify_layer_tool.gox:31:1
+	// Convert to LayerIdentifier struct
+	var identifier tools.LayerIdentifier
+//line cmd/ae-mcp/modify_layer_tool.gox:30:1
 	if
+//line cmd/ae-mcp/modify_layer_tool.gox:30:1
+	name, ok := layerIdentifier["name"].(string); ok && name != "" {
 //line cmd/ae-mcp/modify_layer_tool.gox:31:1
-	name, ok := layerIdObj["name"]; ok {
-//line cmd/ae-mcp/modify_layer_tool.gox:32:1
-		if
-//line cmd/ae-mcp/modify_layer_tool.gox:32:1
-		nameStr, ok := name.(string); ok {
-//line cmd/ae-mcp/modify_layer_tool.gox:33:1
-			layerId = tools.LayerIdentifier{Name: nameStr}
-		}
+		identifier.Name = name
 	} else
-//line cmd/ae-mcp/modify_layer_tool.gox:35:1
+//line cmd/ae-mcp/modify_layer_tool.gox:32:1
 	if
-//line cmd/ae-mcp/modify_layer_tool.gox:35:1
-	index, ok := layerIdObj["index"]; ok {
-//line cmd/ae-mcp/modify_layer_tool.gox:37:1
-		if
-//line cmd/ae-mcp/modify_layer_tool.gox:37:1
-		idxFloat, ok := index.(float64); ok {
-//line cmd/ae-mcp/modify_layer_tool.gox:38:1
-			layerId = tools.LayerIdentifier{Index: int(idxFloat)}
-		}
+//line cmd/ae-mcp/modify_layer_tool.gox:32:1
+	index, ok := layerIdentifier["index"].(float64); ok && index > 0 {
+//line cmd/ae-mcp/modify_layer_tool.gox:33:1
+		identifier.Index = int(index)
 	}
-//line cmd/ae-mcp/modify_layer_tool.gox:42:1
-	props := this.Gop_Env("properties").(map[string]interface{})
-//line cmd/ae-mcp/modify_layer_tool.gox:44:1
+//line cmd/ae-mcp/modify_layer_tool.gox:36:1
 	// Call the implementation in golang
 	var result map[string]interface{}
-//line cmd/ae-mcp/modify_layer_tool.gox:46:1
+//line cmd/ae-mcp/modify_layer_tool.gox:38:1
 	var err error
-//line cmd/ae-mcp/modify_layer_tool.gox:47:1
-	result, err = tools.ModifyLayer(compName, layerId, props)
-//line cmd/ae-mcp/modify_layer_tool.gox:48:1
+//line cmd/ae-mcp/modify_layer_tool.gox:39:1
+	result, err = tools.ModifyLayer(compName, identifier, properties)
+//line cmd/ae-mcp/modify_layer_tool.gox:40:1
 	if err != nil {
-//line cmd/ae-mcp/modify_layer_tool.gox:49:1
+//line cmd/ae-mcp/modify_layer_tool.gox:41:1
 		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
 	}
-//line cmd/ae-mcp/modify_layer_tool.gox:53:1
+//line cmd/ae-mcp/modify_layer_tool.gox:45:1
 	return server.Text__1(server.JsonContent{JSON: result})
 }
 func (this *modify_layer) Classclone() server.ToolProto {
@@ -620,7 +1004,7 @@ func (this *modify_layer) Classclone() server.ToolProto {
 //line cmd/ae-mcp/modify_text_tool.gox:6
 // Tool for modifying text layers
 func (this *modify_text) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/modify_layer_tool.gox:53:1
+//line cmd/ae-mcp/modify_layer_tool.gox:45:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/modify_text_tool.gox:7:1
 	this.Tool("ae_modify_text_layer", func() {

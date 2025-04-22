@@ -1,4 +1,4 @@
-// modify_layer_tool.gox - Tool for modifying layer properties
+// modify_layer_tool.gox - Tool for modifying properties of existing layers
 import (
     "github.com/sunqirui1987/ae-mcp/pkg/tools"
 )
@@ -22,29 +22,21 @@ tool "ae_modify_layer", => {
 
 // Convert parameters to appropriate Go types
 compName := ${composition_name}.(string)
+layerIdentifier := ${layer_identifier}.(map[string]interface{})
+properties := ${properties}.(map[string]interface{})
 
-// Convert layer identifier to appropriate type
-layerIdObj := ${layer_identifier}.(map[string]interface{})
-var layerId tools.LayerIdentifier
-
-// Check if it's a name-based identifier
-if name, ok := layerIdObj["name"]; ok {
-    if nameStr, ok := name.(string); ok {
-        layerId = tools.LayerIdentifier{Name: nameStr}
-    }
-} else if index, ok := layerIdObj["index"]; ok {
-    // Check if it's an index-based identifier
-    if idxFloat, ok := index.(float64); ok {
-        layerId = tools.LayerIdentifier{Index: int(idxFloat)}
-    }
+// Convert to LayerIdentifier struct
+var identifier tools.LayerIdentifier
+if name, ok := layerIdentifier["name"].(string); ok && name != "" {
+    identifier.Name = name
+} else if index, ok := layerIdentifier["index"].(float64); ok && index > 0 {
+    identifier.Index = int(index)
 }
-
-props := ${properties}.(map[string]interface{})
 
 // Call the implementation in golang
 var result map[string]interface{}
 var err error
-result, err = tools.ModifyLayer(compName, layerId, props)
+result, err = tools.ModifyLayer(compName, identifier, properties)
 if err != nil {
     return text({
         JSON: {"error": err.Error()},

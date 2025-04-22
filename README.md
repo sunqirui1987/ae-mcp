@@ -43,8 +43,9 @@ This integration provides a comprehensive set of tools for After Effects:
 | **Compositions** | Create new compositions with custom dimensions, frame rates, and durations |
 | **Text Layers** | Add and modify text layers with font controls, tracking, justification, colors, and styling |
 | **Solid Layers** | Create solid layers with custom colors, dimensions, and 3D properties |
+| **Shape Layers** | Create custom and preset shape layers (rectangles, ellipses, polygons, stars) with full control over vertices, tangents, and feathering |
 | **Layer Properties** | Set position, scale, rotation, opacity, and other transformation properties |
-| **Effects** | Apply effects to layers with customizable parameters |
+| **Effects** | Browse effect categories, view available effects with details (BPC support, GPU acceleration), and apply them to layers with customizable parameters |
 | **Scripting** | Execute arbitrary ExtendScript code for advanced customization |
 
 Each tool implements After Effects functionality via ExtendScript and exposes a clean Go API that follows the MCP specification.
@@ -109,10 +110,13 @@ Here are some examples of what you can ask Claude to do:
 
 * "Create a new composition named 'Intro Animation' with 1920x1080 resolution"
 * "Add a text layer with the message 'Welcome!' and center it"
-* "Apply a fade-in effect to the text layer"
+* "Apply a Gaussian Blur effect to the text layer with a blur radius of 15"
 * "Create a simple logo animation with a bounce effect"
-* "Add a solid layer and apply a particle effect to it"
-* "Change the background color to a gradient from blue to purple"
+* "Add a solid layer and apply a Glow effect to it"
+* "Create a star shape with 5 points and make it spin"
+* "Draw a custom shape path in the form of a wave"
+* "Show me all the blur effects available in After Effects"
+* "Apply a Color Balance effect to the background layer"
 * "Add camera movement that slowly zooms in on the text"
 * "Export the composition as an MP4 file"
 
@@ -121,7 +125,7 @@ Here are some examples of what you can ask Claude to do:
 * Get project and composition information
 * Create and modify compositions
 * Add and manipulate various layer types (text, solid, shape, etc.)
-* Apply and customize effects
+* Browse and apply effects with detailed parameter control
 * Control animation and keyframes
 * Manage project assets and media
 

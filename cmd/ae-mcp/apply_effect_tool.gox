@@ -28,14 +28,14 @@ compName := ${composition_name}.(string)
 layerName := ${layer_name}.(string)
 effectName := ${effect_name}.(string)
 
-// Convert effect parameters if provided
+// Get optional parameters
 var effectParams tools.EffectParameters
 if ${parameters} != nil {
     effectParams = ${parameters}.(map[string]interface{})
 }
 
 // Call the implementation in golang
-var result map[string]interface{}
+var result tools.EffectDetails
 var err error
 result, err = tools.ApplyEffect(compName, layerName, effectName, effectParams)
 if err != nil {
