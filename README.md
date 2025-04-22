@@ -5,6 +5,25 @@
 
 A powerful, extensible Model Context Protocol (MCP) integration for Adobe After Effects. This project enables AI assistants to directly interact with and control After Effects through a standardized interface.
 
+## 📸 Screenshots
+
+### After Effects Integration
+![After Effects Interface](docs/demo.png)
+
+### MCP Tool Inspector
+![MCP Tool Inspector](docs/demo3.png)
+
+### Claude Integration
+![Claude MCP Integration](docs/demo1.png)
+
+## 🎬 Demo Video
+
+Check out the demo video below to see the integration in action:
+
+<!-- Method 3: HTML video tag (works in some markdown renderers) -->
+<video src="https://github.com/sunqirui1987/ae-mcp/raw/main/docs/数学形状演示.mp4" controls="controls" style="max-width: 730px;">
+</video>
+
 ## ✨ Features
 
 - **Extensible Architecture**: Easily add new tools through configuration files
