@@ -1,0 +1,24 @@
+// get_composition_details_tool.gox - Tool for getting composition details
+import (
+    "github.com/sunqirui1987/ae-mcp/pkg/tools"
+)
+
+// Tool for getting composition details
+tool "ae_get_composition_details", => {
+    description "Get detailed information about a specific composition"
+    string "composition_name", => {
+        description "Name of the composition to get details for"
+        required
+    }
+}
+
+// Call the implementation in golang
+result, err := tools.GetCompositionDetails(${composition_name})
+if err != nil {
+    return text({
+        JSON: {"error": err.Error()},
+    })
+}
+return text({
+    JSON: result,
+}) 

@@ -1,0 +1,41 @@
+// add_solid_layer_tool.gox - Tool for adding solid color layers
+import (
+    "github.com/sunqirui1987/ae-mcp/pkg/tools"
+)
+
+// Tool for adding solid color layers
+tool "ae_add_solid_layer", => {
+    description "Add a solid color layer to a composition"
+    string "composition_name", => {
+        description "Name of the composition to add the layer to"
+        required
+    }
+    string "layer_name", => {
+        description "Name of the new layer"
+        required
+    }
+    array "color", => {
+        description "RGB color array [R, G, B], with values ranging from 0-1"
+        required
+    }
+    float "width", => {
+        description "Layer width (pixels), defaults to composition width"
+    }
+    float "height", => {
+        description "Layer height (pixels), defaults to composition height"
+    }
+    bool "is3D", => {
+        description "Whether the layer is 3D"
+    }
+}
+
+// Call the implementation in golang
+result, err := tools.AddSolidLayer(${composition_name}, ${layer_name}, ${color}, ${width}, ${height}, ${is3D})
+if err != nil {
+    return text({
+        JSON: {"error": err.Error()},
+    })
+}
+return text({
+    JSON: result,
+}) 

@@ -1,0 +1,39 @@
+// create_composition_tool.gox - Tool for creating new compositions
+import (
+    "github.com/sunqirui1987/ae-mcp/pkg/tools"
+)
+
+// Tool for creating new compositions
+tool "ae_create_composition", => {
+    description "Create a new composition in After Effects"
+    string "name", => {
+        description "Name of the new composition"
+        required
+    }
+    float "width", => {
+        description "Composition width (pixels)"
+        required
+    }
+    float "height", => {
+        description "Composition height (pixels)"
+        required
+    }
+    float "duration", => {
+        description "Composition duration (seconds)"
+        required
+    }
+    float "frameRate", => {
+        description "Composition frame rate"
+    }
+}
+
+// Call the implementation in golang
+result, err := tools.CreateComposition(${name}, ${width}, ${height}, ${duration}, ${frameRate})
+if err != nil {
+    return text({
+        JSON: {"error": err.Error()},
+    })
+}
+return text({
+    JSON: result,
+}) 

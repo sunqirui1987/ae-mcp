@@ -1,0 +1,32 @@
+// modify_layer_tool.gox - Tool for modifying layer properties
+import (
+    "github.com/sunqirui1987/ae-mcp/pkg/tools"
+)
+
+// Tool for modifying layer properties
+tool "ae_modify_layer", => {
+    description "Modify properties of an existing layer"
+    string "composition_name", => {
+        description "Name of the composition containing the layer"
+        required
+    }
+    object "layer_identifier", => {
+        description "Layer identifier, can be in the format {name: 'layer name'} or {index: 1}"
+        required
+    }
+    object "properties", => {
+        description "Properties object to modify: position, scale, rotation, opacity, etc."
+        required
+    }
+}
+
+// Call the implementation in golang
+result, err := tools.ModifyLayer(${composition_name}, ${layer_identifier}, ${properties})
+if err != nil {
+    return text({
+        JSON: {"error": err.Error()},
+    })
+}
+return text({
+    JSON: result,
+}) 
