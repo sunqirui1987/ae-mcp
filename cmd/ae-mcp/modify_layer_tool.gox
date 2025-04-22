@@ -20,8 +20,31 @@ tool "ae_modify_layer", => {
     }
 }
 
+// Convert parameters to appropriate Go types
+compName := ${composition_name}.(string)
+
+// Convert layer identifier to appropriate type
+layerIdObj := ${layer_identifier}.(map[string]interface{})
+var layerId tools.LayerIdentifier
+
+// Check if it's a name-based identifier
+if name, ok := layerIdObj["name"]; ok {
+    if nameStr, ok := name.(string); ok {
+        layerId = tools.LayerIdentifier{Name: nameStr}
+    }
+} else if index, ok := layerIdObj["index"]; ok {
+    // Check if it's an index-based identifier
+    if idxFloat, ok := index.(float64); ok {
+        layerId = tools.LayerIdentifier{Index: int(idxFloat)}
+    }
+}
+
+props := ${properties}.(map[string]interface{})
+
 // Call the implementation in golang
-result, err := tools.ModifyLayer(${composition_name}, ${layer_identifier}, ${properties})
+var result map[string]interface{}
+var err error
+result, err = tools.ModifyLayer(compName, layerId, props)
 if err != nil {
     return text({
         JSON: {"error": err.Error()},

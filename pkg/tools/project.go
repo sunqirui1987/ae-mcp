@@ -6,8 +6,11 @@ import (
 	"github.com/sunqirui1987/ae-mcp/pkg/ae"
 )
 
+// ProjectInfo represents information about an After Effects project
+type ProjectInfo map[string]interface{}
+
 // GetProjectInfo retrieves information about the current After Effects project
-func GetProjectInfo() (interface{}, error) {
+func GetProjectInfo() (ProjectInfo, error) {
 	// Execute JavaScript to get project information
 	script := `
 	try {
@@ -61,7 +64,7 @@ func GetProjectInfo() (interface{}, error) {
 		}
 		
 		// Parse the JSON result into a structured object
-		var projectInfo map[string]interface{}
+		var projectInfo ProjectInfo
 		if err := json.Unmarshal([]byte(resultStr), &projectInfo); err != nil {
 			return nil, err
 		}

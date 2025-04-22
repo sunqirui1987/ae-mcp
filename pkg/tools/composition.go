@@ -6,18 +6,15 @@ import (
 	"github.com/sunqirui1987/ae-mcp/pkg/ae"
 )
 
-// GetCompositionDetails retrieves detailed information about a composition
-func GetCompositionDetails(compositionName interface{}) (interface{}, error) {
-	// Type check
-	compName, ok := compositionName.(string)
-	if !ok {
-		return nil, ErrInvalidParams
-	}
+// CompositionDetails represents the details of an After Effects composition
+type CompositionDetails map[string]interface{}
 
+// GetCompositionDetails retrieves detailed information about a composition
+func GetCompositionDetails(compositionName string) (CompositionDetails, error) {
 	// Execute JavaScript to get composition details
 	script := `
 	try {
-		var compName = "` + compName + `";
+		var compName = "` + compositionName + `";
 		var project = app.project;
 		var comp = null;
 		
@@ -94,7 +91,7 @@ func GetCompositionDetails(compositionName interface{}) (interface{}, error) {
 		}
 		
 		// Parse the JSON result into a structured object
-		var compDetails map[string]interface{}
+		var compDetails CompositionDetails
 		if err := json.Unmarshal([]byte(resultStr), &compDetails); err != nil {
 			return nil, err
 		}
@@ -111,41 +108,15 @@ func GetCompositionDetails(compositionName interface{}) (interface{}, error) {
 }
 
 // CreateComposition creates a new composition in After Effects
-func CreateComposition(name interface{}, width interface{}, height interface{}, duration interface{}, frameRate interface{}) (interface{}, error) {
-	// Type checks
-	nameStr, ok := name.(string)
-	if !ok {
-		return nil, fmt.Errorf("name must be a string: %w", ErrInvalidParams)
-	}
-
-	widthInt, ok := width.(int)
-	if !ok {
-		return nil, fmt.Errorf("width must be an integer: %w", ErrInvalidParams)
-	}
-
-	heightInt, ok := height.(int)
-	if !ok {
-		return nil, fmt.Errorf("height must be an integer: %w", ErrInvalidParams)
-	}
-
-	durationFloat, ok := duration.(float64)
-	if !ok {
-		return nil, fmt.Errorf("duration must be a number: %w", ErrInvalidParams)
-	}
-
-	frameRateFloat, ok := frameRate.(float64)
-	if !ok {
-		frameRateFloat = 30.0 // Default frame rate
-	}
-
+func CreateComposition(name string, width int, height int, duration float64, frameRate float64) (CompositionDetails, error) {
 	// Execute JavaScript to create composition
 	script := `
 	try {
-		var name = "` + nameStr + `";
-		var width = ` + fmt.Sprintf("%d", widthInt) + `;
-		var height = ` + fmt.Sprintf("%d", heightInt) + `;
-		var duration = ` + fmt.Sprintf("%f", durationFloat) + `;
-		var frameRate = ` + fmt.Sprintf("%f", frameRateFloat) + `;
+		var name = "` + name + `";
+		var width = ` + fmt.Sprintf("%d", width) + `;
+		var height = ` + fmt.Sprintf("%d", height) + `;
+		var duration = ` + fmt.Sprintf("%f", duration) + `;
+		var frameRate = ` + fmt.Sprintf("%f", frameRate) + `;
 		
 		// Create the composition
 		var project = app.project;
@@ -181,7 +152,7 @@ func CreateComposition(name interface{}, width interface{}, height interface{}, 
 		}
 		
 		// Parse the JSON result into a structured object
-		var compDetails map[string]interface{}
+		var compDetails CompositionDetails
 		if err := json.Unmarshal([]byte(resultStr), &compDetails); err != nil {
 			return nil, err
 		}

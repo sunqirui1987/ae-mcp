@@ -12,8 +12,13 @@ tool "ae_get_composition_details", => {
     }
 }
 
+// Convert parameters to appropriate Go types
+compName := ${composition_name}.(string)
+
 // Call the implementation in golang
-result, err := tools.GetCompositionDetails(${composition_name})
+var result map[string]interface{}
+var err error
+result, err = tools.GetCompositionDetails(compName)
 if err != nil {
     return text({
         JSON: {"error": err.Error()},

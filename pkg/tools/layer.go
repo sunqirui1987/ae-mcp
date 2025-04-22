@@ -6,52 +6,32 @@ import (
 	"github.com/sunqirui1987/ae-mcp/pkg/ae"
 )
 
+// LayerInfo represents information about a layer in After Effects
+type LayerInfo map[string]interface{}
+
+// ColorRGB represents an RGB color with values between 0 and 1
+type ColorRGB [3]float64
+
+// LayerIdentifier can be either a name or index
+type LayerIdentifier struct {
+	Name  string  `json:"name,omitempty"`
+	Index int     `json:"index,omitempty"`
+}
+
+// LayerProperties represents properties that can be modified on a layer
+type LayerProperties map[string]interface{}
+
 // AddSolidLayer adds a solid layer to a composition
-func AddSolidLayer(compositionName interface{}, layerName interface{}, color interface{}, width interface{}, height interface{}, is3D interface{}) (interface{}, error) {
-	// Type checks
-	compName, ok := compositionName.(string)
-	if !ok {
-		return nil, fmt.Errorf("composition_name must be a string: %w", ErrInvalidParams)
-	}
-
-	layerNameStr, ok := layerName.(string)
-	if !ok {
-		return nil, fmt.Errorf("layer_name must be a string: %w", ErrInvalidParams)
-	}
-
-	colorArray, ok := color.([]interface{})
-	if !ok || len(colorArray) != 3 {
-		return nil, fmt.Errorf("color must be an array of three values [R, G, B]: %w", ErrInvalidParams)
-	}
-
-	// Parse color values
-	var r, g, b float64
-	r, ok = colorArray[0].(float64)
-	if !ok || r < 0 || r > 1 {
-		return nil, fmt.Errorf("red color value must be between 0 and 1: %w", ErrInvalidParams)
-	}
-	g, ok = colorArray[1].(float64)
-	if !ok || g < 0 || g > 1 {
-		return nil, fmt.Errorf("green color value must be between 0 and 1: %w", ErrInvalidParams)
-	}
-	b, ok = colorArray[2].(float64)
-	if !ok || b < 0 || b > 1 {
-		return nil, fmt.Errorf("blue color value must be between 0 and 1: %w", ErrInvalidParams)
-	}
-
-	widthInt, _ := width.(int)
-	heightInt, _ := height.(int)
-	is3DBool, _ := is3D.(bool)
-
+func AddSolidLayer(compositionName string, layerName string, color ColorRGB, width int, height int, is3D bool) (LayerInfo, error) {
 	// Execute JavaScript to add solid layer
 	script := `
 	try {
-		var compName = "` + compName + `";
-		var layerName = "` + layerNameStr + `";
-		var color = [` + fmt.Sprintf("%f, %f, %f", r, g, b) + `];
-		var width = ` + fmt.Sprintf("%d", widthInt) + `;
-		var height = ` + fmt.Sprintf("%d", heightInt) + `;
-		var is3D = ` + fmt.Sprintf("%t", is3DBool) + `;
+		var compName = "` + compositionName + `";
+		var layerName = "` + layerName + `";
+		var color = [` + fmt.Sprintf("%f, %f, %f", color[0], color[1], color[2]) + `];
+		var width = ` + fmt.Sprintf("%d", width) + `;
+		var height = ` + fmt.Sprintf("%d", height) + `;
+		var is3D = ` + fmt.Sprintf("%t", is3D) + `;
 		
 		// Find the composition
 		var project = app.project;
@@ -122,7 +102,7 @@ func AddSolidLayer(compositionName interface{}, layerName interface{}, color int
 		}
 		
 		// Parse the JSON result into a structured object
-		var layerInfo map[string]interface{}
+		var layerInfo LayerInfo
 		if err := json.Unmarshal([]byte(resultStr), &layerInfo); err != nil {
 			return nil, err
 		}
@@ -139,47 +119,31 @@ func AddSolidLayer(compositionName interface{}, layerName interface{}, color int
 }
 
 // ModifyLayer modifies properties of an existing layer
-func ModifyLayer(compositionName interface{}, layerIdentifier interface{}, properties interface{}) (interface{}, error) {
-	// Type checks
-	compName, ok := compositionName.(string)
-	if !ok {
-		return nil, fmt.Errorf("composition_name must be a string: %w", ErrInvalidParams)
-	}
-
-	layerID, ok := layerIdentifier.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("layer_identifier must be an object with name or index: %w", ErrInvalidParams)
-	}
-
-	props, ok := properties.(map[string]interface{})
-	if !ok {
-		return nil, fmt.Errorf("properties must be an object: %w", ErrInvalidParams)
-	}
-
+func ModifyLayer(compositionName string, layerIdentifier LayerIdentifier, properties LayerProperties) (LayerInfo, error) {
 	// Convert properties to JavaScript
-	propsJSON, err := json.Marshal(props)
+	propsJSON, err := json.Marshal(properties)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize properties: %w", err)
 	}
 
 	// Create layer identification JavaScript code
 	var layerIdentifierJS string
-	if layerName, hasName := layerID["name"].(string); hasName {
+	if layerIdentifier.Name != "" {
 		layerIdentifierJS = `
 		// Find layer by name
 		var targetLayer = null;
 		for (var i = 1; i <= comp.numLayers; i++) {
-			if (comp.layer(i).name === "` + layerName + `") {
+			if (comp.layer(i).name === "` + layerIdentifier.Name + `") {
 				targetLayer = comp.layer(i);
 				break;
 			}
 		}
 		`
-	} else if layerIndex, hasIndex := layerID["index"].(float64); hasIndex {
+	} else if layerIdentifier.Index > 0 {
 		layerIdentifierJS = fmt.Sprintf(`
 		// Get layer by index
 		var targetLayer = comp.layer(%d);
-		`, int(layerIndex))
+		`, layerIdentifier.Index)
 	} else {
 		return nil, fmt.Errorf("layer_identifier must have either name or index field: %w", ErrInvalidParams)
 	}
@@ -187,7 +151,7 @@ func ModifyLayer(compositionName interface{}, layerIdentifier interface{}, prope
 	// Execute JavaScript to modify layer
 	script := `
 	try {
-		var compName = "` + compName + `";
+		var compName = "` + compositionName + `";
 		var props = ` + string(propsJSON) + `;
 		
 		// Find the composition
@@ -296,7 +260,7 @@ func ModifyLayer(compositionName interface{}, layerIdentifier interface{}, prope
 		}
 		
 		// Parse the JSON result into a structured object
-		var resultData map[string]interface{}
+		var resultData LayerInfo
 		if err := json.Unmarshal([]byte(resultStr), &resultData); err != nil {
 			return nil, err
 		}

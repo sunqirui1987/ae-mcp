@@ -89,13 +89,61 @@ func (this *add_solid_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallT
 		})
 	})
 //line cmd/ae-mcp/add_solid_layer_tool.gox:33:1
-	result, err := tools.AddSolidLayer(this.Gop_Env("composition_name"), this.Gop_Env("layer_name"), this.Gop_Env("color"), this.Gop_Env("width"), this.Gop_Env("height"), this.Gop_Env("is3D"))
+	compName := this.Gop_Env("composition_name").(string)
 //line cmd/ae-mcp/add_solid_layer_tool.gox:34:1
+	layerName := this.Gop_Env("layer_name").(string)
+//line cmd/ae-mcp/add_solid_layer_tool.gox:37:1
+	colorArray := this.Gop_Env("color").([]interface{})
+//line cmd/ae-mcp/add_solid_layer_tool.gox:38:1
+	var colorVal tools.ColorRGB
+//line cmd/ae-mcp/add_solid_layer_tool.gox:41:1
+	if len(colorArray) >= 3 {
+//line cmd/ae-mcp/add_solid_layer_tool.gox:42:1
+		r, _ := colorArray[0].(float64)
+//line cmd/ae-mcp/add_solid_layer_tool.gox:43:1
+		g, _ := colorArray[1].(float64)
+//line cmd/ae-mcp/add_solid_layer_tool.gox:44:1
+		b, _ := colorArray[2].(float64)
+//line cmd/ae-mcp/add_solid_layer_tool.gox:45:1
+		colorVal = tools.ColorRGB{r, g, b}
+	} else {
+//line cmd/ae-mcp/add_solid_layer_tool.gox:47:1
+		colorVal = tools.ColorRGB{1.0, 1.0, 1.0}
+	}
+//line cmd/ae-mcp/add_solid_layer_tool.gox:51:1
+	widthVal := 0
+//line cmd/ae-mcp/add_solid_layer_tool.gox:52:1
+	if this.Gop_Env("width") != nil {
+//line cmd/ae-mcp/add_solid_layer_tool.gox:53:1
+		widthVal = int(this.Gop_Env("width").(float64))
+	}
+//line cmd/ae-mcp/add_solid_layer_tool.gox:56:1
+	heightVal := 0
+//line cmd/ae-mcp/add_solid_layer_tool.gox:57:1
+	if this.Gop_Env("height") != nil {
+//line cmd/ae-mcp/add_solid_layer_tool.gox:58:1
+		heightVal = int(this.Gop_Env("height").(float64))
+	}
+//line cmd/ae-mcp/add_solid_layer_tool.gox:61:1
+	is3DVal := false
+//line cmd/ae-mcp/add_solid_layer_tool.gox:62:1
+	if this.Gop_Env("is3D") != nil {
+//line cmd/ae-mcp/add_solid_layer_tool.gox:63:1
+		is3DVal = this.Gop_Env("is3D").(bool)
+	}
+//line cmd/ae-mcp/add_solid_layer_tool.gox:66:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/add_solid_layer_tool.gox:68:1
+	var err error
+//line cmd/ae-mcp/add_solid_layer_tool.gox:69:1
+	result, err = tools.AddSolidLayer(compName, layerName, colorVal, widthVal, heightVal, is3DVal)
+//line cmd/ae-mcp/add_solid_layer_tool.gox:70:1
 	if err != nil {
-//line cmd/ae-mcp/add_solid_layer_tool.gox:35:1
+//line cmd/ae-mcp/add_solid_layer_tool.gox:71:1
 		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
 	}
-//line cmd/ae-mcp/add_solid_layer_tool.gox:39:1
+//line cmd/ae-mcp/add_solid_layer_tool.gox:75:1
 	return server.Text__1(server.JsonContent{JSON: result})
 }
 func (this *add_solid_layer) Classclone() server.ToolProto {
@@ -105,7 +153,7 @@ func (this *add_solid_layer) Classclone() server.ToolProto {
 //line cmd/ae-mcp/create_composition_tool.gox:6
 // Tool for creating new compositions
 func (this *create_composition) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/add_solid_layer_tool.gox:39:1
+//line cmd/ae-mcp/add_solid_layer_tool.gox:75:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/create_composition_tool.gox:7:1
 	this.Tool("ae_create_composition", func() {
@@ -146,13 +194,48 @@ func (this *create_composition) Main(_gop_arg0 context.Context, _gop_arg1 mcp.Ca
 		})
 	})
 //line cmd/ae-mcp/create_composition_tool.gox:31:1
-	result, err := tools.CreateComposition(this.Gop_Env("name"), this.Gop_Env("width"), this.Gop_Env("height"), this.Gop_Env("duration"), this.Gop_Env("frameRate"))
-//line cmd/ae-mcp/create_composition_tool.gox:32:1
+	nameStr := this.Gop_Env("name").(string)
+//line cmd/ae-mcp/create_composition_tool.gox:34:1
+	widthVal := int(this.Gop_Env("width").(float64))
+//line cmd/ae-mcp/create_composition_tool.gox:35:1
+	if widthVal == 0 {
+//line cmd/ae-mcp/create_composition_tool.gox:36:1
+		widthVal = 1920
+	}
+//line cmd/ae-mcp/create_composition_tool.gox:39:1
+	heightVal := int(this.Gop_Env("height").(float64))
+//line cmd/ae-mcp/create_composition_tool.gox:40:1
+	if heightVal == 0 {
+//line cmd/ae-mcp/create_composition_tool.gox:41:1
+		heightVal = 1080
+	}
+//line cmd/ae-mcp/create_composition_tool.gox:44:1
+	durationVal, ok := this.Gop_Env("duration").(float64)
+//line cmd/ae-mcp/create_composition_tool.gox:45:1
+	if !ok {
+//line cmd/ae-mcp/create_composition_tool.gox:46:1
+		durationVal = 60
+	}
+//line cmd/ae-mcp/create_composition_tool.gox:49:1
+	frameRateVal, ok := this.Gop_Env("frameRate").(float64)
+//line cmd/ae-mcp/create_composition_tool.gox:50:1
+	if !ok {
+//line cmd/ae-mcp/create_composition_tool.gox:51:1
+		frameRateVal = 30
+	}
+//line cmd/ae-mcp/create_composition_tool.gox:54:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/create_composition_tool.gox:56:1
+	var err error
+//line cmd/ae-mcp/create_composition_tool.gox:57:1
+	result, err = tools.CreateComposition(nameStr, widthVal, heightVal, durationVal, frameRateVal)
+//line cmd/ae-mcp/create_composition_tool.gox:58:1
 	if err != nil {
-//line cmd/ae-mcp/create_composition_tool.gox:33:1
+//line cmd/ae-mcp/create_composition_tool.gox:59:1
 		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
 	}
-//line cmd/ae-mcp/create_composition_tool.gox:37:1
+//line cmd/ae-mcp/create_composition_tool.gox:63:1
 	return server.Text__1(server.JsonContent{JSON: result})
 }
 func (this *create_composition) Classclone() server.ToolProto {
@@ -162,7 +245,7 @@ func (this *create_composition) Classclone() server.ToolProto {
 //line cmd/ae-mcp/get_composition_details_tool.gox:6
 // Tool for getting composition details
 func (this *get_composition_details) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/create_composition_tool.gox:37:1
+//line cmd/ae-mcp/create_composition_tool.gox:63:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/get_composition_details_tool.gox:7:1
 	this.Tool("ae_get_composition_details", func() {
@@ -177,13 +260,20 @@ func (this *get_composition_details) Main(_gop_arg0 context.Context, _gop_arg1 m
 		})
 	})
 //line cmd/ae-mcp/get_composition_details_tool.gox:16:1
-	result, err := tools.GetCompositionDetails(this.Gop_Env("composition_name"))
-//line cmd/ae-mcp/get_composition_details_tool.gox:17:1
-	if err != nil {
+	compName := this.Gop_Env("composition_name").(string)
 //line cmd/ae-mcp/get_composition_details_tool.gox:18:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/get_composition_details_tool.gox:20:1
+	var err error
+//line cmd/ae-mcp/get_composition_details_tool.gox:21:1
+	result, err = tools.GetCompositionDetails(compName)
+//line cmd/ae-mcp/get_composition_details_tool.gox:22:1
+	if err != nil {
+//line cmd/ae-mcp/get_composition_details_tool.gox:23:1
 		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
 	}
-//line cmd/ae-mcp/get_composition_details_tool.gox:22:1
+//line cmd/ae-mcp/get_composition_details_tool.gox:27:1
 	return server.Text__1(server.JsonContent{JSON: result})
 }
 func (this *get_composition_details) Classclone() server.ToolProto {
@@ -193,7 +283,7 @@ func (this *get_composition_details) Classclone() server.ToolProto {
 //line cmd/ae-mcp/modify_layer_tool.gox:6
 // Tool for modifying layer properties
 func (this *modify_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/get_composition_details_tool.gox:22:1
+//line cmd/ae-mcp/get_composition_details_tool.gox:27:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/modify_layer_tool.gox:7:1
 	this.Tool("ae_modify_layer", func() {
@@ -222,13 +312,50 @@ func (this *modify_layer) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallTool
 		})
 	})
 //line cmd/ae-mcp/modify_layer_tool.gox:24:1
-	result, err := tools.ModifyLayer(this.Gop_Env("composition_name"), this.Gop_Env("layer_identifier"), this.Gop_Env("properties"))
-//line cmd/ae-mcp/modify_layer_tool.gox:25:1
+	compName := this.Gop_Env("composition_name").(string)
+//line cmd/ae-mcp/modify_layer_tool.gox:27:1
+	layerIdObj := this.Gop_Env("layer_identifier").(map[string]interface{})
+//line cmd/ae-mcp/modify_layer_tool.gox:28:1
+	var layerId tools.LayerIdentifier
+//line cmd/ae-mcp/modify_layer_tool.gox:31:1
+	if
+//line cmd/ae-mcp/modify_layer_tool.gox:31:1
+	name, ok := layerIdObj["name"]; ok {
+//line cmd/ae-mcp/modify_layer_tool.gox:32:1
+		if
+//line cmd/ae-mcp/modify_layer_tool.gox:32:1
+		nameStr, ok := name.(string); ok {
+//line cmd/ae-mcp/modify_layer_tool.gox:33:1
+			layerId = tools.LayerIdentifier{Name: nameStr}
+		}
+	} else
+//line cmd/ae-mcp/modify_layer_tool.gox:35:1
+	if
+//line cmd/ae-mcp/modify_layer_tool.gox:35:1
+	index, ok := layerIdObj["index"]; ok {
+//line cmd/ae-mcp/modify_layer_tool.gox:37:1
+		if
+//line cmd/ae-mcp/modify_layer_tool.gox:37:1
+		idxFloat, ok := index.(float64); ok {
+//line cmd/ae-mcp/modify_layer_tool.gox:38:1
+			layerId = tools.LayerIdentifier{Index: int(idxFloat)}
+		}
+	}
+//line cmd/ae-mcp/modify_layer_tool.gox:42:1
+	props := this.Gop_Env("properties").(map[string]interface{})
+//line cmd/ae-mcp/modify_layer_tool.gox:44:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/modify_layer_tool.gox:46:1
+	var err error
+//line cmd/ae-mcp/modify_layer_tool.gox:47:1
+	result, err = tools.ModifyLayer(compName, layerId, props)
+//line cmd/ae-mcp/modify_layer_tool.gox:48:1
 	if err != nil {
-//line cmd/ae-mcp/modify_layer_tool.gox:26:1
+//line cmd/ae-mcp/modify_layer_tool.gox:49:1
 		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
 	}
-//line cmd/ae-mcp/modify_layer_tool.gox:30:1
+//line cmd/ae-mcp/modify_layer_tool.gox:53:1
 	return server.Text__1(server.JsonContent{JSON: result})
 }
 func (this *modify_layer) Classclone() server.ToolProto {
@@ -238,21 +365,26 @@ func (this *modify_layer) Classclone() server.ToolProto {
 //line cmd/ae-mcp/project_tool.gox:6
 // Tool for getting project information
 func (this *project) Main(_gop_arg0 context.Context, _gop_arg1 mcp.CallToolRequest, _gop_arg2 *server.ToolAppProto) mcp.Content {
-//line cmd/ae-mcp/modify_layer_tool.gox:30:1
+//line cmd/ae-mcp/modify_layer_tool.gox:53:1
 	this.ToolApp.Main(_gop_arg0, _gop_arg1, _gop_arg2)
 //line cmd/ae-mcp/project_tool.gox:7:1
 	this.Tool("ae_get_project_info", func() {
 //line cmd/ae-mcp/project_tool.gox:8:1
 		this.Description("Get information about the current After Effects project")
 	})
-//line cmd/ae-mcp/project_tool.gox:12:1
-	result, err := tools.GetProjectInfo()
 //line cmd/ae-mcp/project_tool.gox:13:1
+	// Call the implementation in golang
+	var result map[string]interface{}
+//line cmd/ae-mcp/project_tool.gox:15:1
+	var err error
+//line cmd/ae-mcp/project_tool.gox:16:1
+	result, err = tools.GetProjectInfo()
+//line cmd/ae-mcp/project_tool.gox:17:1
 	if err != nil {
-//line cmd/ae-mcp/project_tool.gox:14:1
+//line cmd/ae-mcp/project_tool.gox:18:1
 		return server.Text__1(server.JsonContent{JSON: map[string]string{"error": err.Error()}})
 	}
-//line cmd/ae-mcp/project_tool.gox:18:1
+//line cmd/ae-mcp/project_tool.gox:22:1
 	return server.Text__1(server.JsonContent{JSON: result})
 }
 func (this *project) Classclone() server.ToolProto {
@@ -260,6 +392,6 @@ func (this *project) Classclone() server.ToolProto {
 	return &_gop_ret
 }
 func main() {
-//line cmd/ae-mcp/project_tool.gox:18:1
+//line cmd/ae-mcp/project_tool.gox:22:1
 	new(MCPApp).Main()
 }
