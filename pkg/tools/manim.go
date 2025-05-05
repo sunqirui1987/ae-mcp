@@ -109,7 +109,7 @@ func (t *ManimTool) CreateManimLayer(code string, sceneName string) (ManimResult
 					"startTime": layer.startTime
 				}
 			};
-			JSON.stringify(result);
+			return returnjson(result);
 		} catch (err) {
 			$.writeln("Error: " + err.toString());
 			throw new Error(err.toString());
@@ -156,7 +156,7 @@ func (t *ManimTool) GetManimLayerInfo(layerID string) (ManimResult, error) {
 				throw new Error("Layer not found");
 			}
 
-			return {
+			var result = {
 				"layerId": layer.id.toString(),
 				"layerName": layer.name,
 				"layerIndex": layer.index,
@@ -167,6 +167,7 @@ func (t *ManimTool) GetManimLayerInfo(layerID string) (ManimResult, error) {
 					"startTime": layer.startTime
 				}
 			};
+			return returnjson(result);
 		} catch (err) {
 			throw new Error(err.toString());
 		}
@@ -222,7 +223,7 @@ func (t *ManimTool) UpdateManimLayer(layerID string, code string, sceneName stri
 			// Remove old layer
 			oldLayer.remove();
 
-			return {
+			var result = {
 				"layerId": newLayer.id.toString(),
 				"layerName": newLayer.name,
 				"layerIndex": newLayer.index,
@@ -234,6 +235,7 @@ func (t *ManimTool) UpdateManimLayer(layerID string, code string, sceneName stri
 					"startTime": newLayer.startTime
 				}
 			};
+			return returnjson(result);
 		} catch (err) {
 			throw new Error(err.toString());
 		}

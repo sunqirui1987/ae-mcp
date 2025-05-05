@@ -98,6 +98,8 @@ Each tool implements After Effects functionality via ExtendScript and exposes a 
      # Note: Run Command Prompt or PowerShell as Administrator
      # Right-click on Command Prompt/PowerShell and select "Run as Administrator"
      choco install ffmpeg
+     choco install miktex
+
      
      # Method 2: Manual installation (if you don't have admin rights)
      # 1. Download ffmpeg from https://github.com/BtbN/FFmpeg-Builds/releases
