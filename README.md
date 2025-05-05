@@ -47,6 +47,7 @@ This integration provides a comprehensive set of tools for After Effects:
 | **Layer Properties** | Set position, scale, rotation, opacity, and other transformation properties |
 | **Effects** | Browse effect categories, view available effects with details (BPC support, GPU acceleration), and apply them to layers with customizable parameters |
 | **Scripting** | Execute arbitrary ExtendScript code for advanced customization |
+| **Manim Integration** | Create mathematical animations using Manim and import them as transparent WebP layers |
 
 Each tool implements After Effects functionality via ExtendScript and exposes a clean Go API that follows the MCP specification.
 
@@ -56,6 +57,7 @@ Each tool implements After Effects functionality via ExtendScript and exposes a 
 
 - Adobe After Effects (CC 2020 or later recommended)
 - Go/Go+ runtime (for the MCP server)
+- Python 3.7+ and pip (for Manim)
 - Basic knowledge of After Effects and MCP
 
 ### Installation
@@ -66,13 +68,96 @@ Each tool implements After Effects functionality via ExtendScript and exposes a 
    cd ae-mcp
    ```
 
-2. Install dependencies:
+2. Install Python and pip:
+   - Windows:
+     ```bash
+     # 1. Download Python
+     # Visit https://www.python.org/downloads/
+     # Click "Download Python 3.x.x" (latest version)
+     
+     # 2. Run the installer
+     # - Check "Add Python to PATH"
+     # - Choose "Customize installation"
+     # - Select all optional features
+     # - Choose "Install for all users"
+     # - Set installation path (e.g., C:\Python3x)
+     
+     # 3. Verify installation
+     # Open Command Prompt (cmd) or PowerShell and run:
+     python --version
+     pip --version
+     
+     # 4. Install required Windows dependencies
+     # Install Microsoft Visual C++ Build Tools
+     # Download from: https://visualstudio.microsoft.com/visual-cpp-build-tools/
+     # During installation, select "Desktop development with C++"
+     
+     # 5. Install ffmpeg
+     # Method 1: Using Chocolatey (recommended)
+     # First install Chocolatey from https://chocolatey.org/install
+     # Note: Run Command Prompt or PowerShell as Administrator
+     # Right-click on Command Prompt/PowerShell and select "Run as Administrator"
+     choco install ffmpeg
+     
+     # Method 2: Manual installation (if you don't have admin rights)
+     # 1. Download ffmpeg from https://github.com/BtbN/FFmpeg-Builds/releases
+     #    Choose: ffmpeg-master-latest-win64-gpl.zip
+     # 2. Extract the zip file to a location like C:\ffmpeg
+     # 3. Add the bin folder to your PATH environment variable:
+     #    - Open System Properties > Advanced > Environment Variables
+     #    - Under User variables, find PATH
+     #    - Add new entry: C:\ffmpeg\bin
+     # 4. Verify installation:
+     ffmpeg -version
+     
+     # 6. Install additional Python packages
+     pip install wheel
+     pip install pycairo
+     pip install manim
+     ```
+   - macOS:
+     ```bash
+     # Using Homebrew
+     brew install python
+     brew install ffmpeg
+     
+     # Verify installation
+     python3 --version
+     pip3 --version
+     ffmpeg -version
+     ```
+   - Linux:
+     ```bash
+     # Ubuntu/Debian
+     sudo apt update
+     sudo apt install python3 python3-pip ffmpeg
+     
+     # Fedora
+     sudo dnf install python3 python3-pip ffmpeg
+     
+     # Verify installation
+     python3 --version
+     pip3 --version
+     ffmpeg -version
+     ```
+
+3. Install dependencies:
    ```bash
    gop mod tidy
-   gop build ./cmd/ae-mcp/
+   gop build ./cmd/ae-mcp/pip install manim
    ```
 
-3. Install the After Effects ExtendScript:
+4. Install Manim:
+   ```bash
+   # Install Manim and its dependencies
+   pip install manim
+   
+   # For Windows users, you might need to install additional dependencies:
+   pip install pycairo
+   pip install manim
+   ```
+
+5. Install the After Effects ExtendScript:
    - Open After Effects
    - Go to File > Scripts > Run Script File...
    - Select the `js/ae-mcp.jsx` file
@@ -119,6 +204,8 @@ Here are some examples of what you can ask Claude to do:
 * "Apply a Color Balance effect to the background layer"
 * "Add camera movement that slowly zooms in on the text"
 * "Export the composition as an MP4 file"
+* "Create a Manim animation showing a rotating cube and add it as a layer"
+* "Generate a mathematical equation animation using Manim and import it"
 
 ### Capabilities
 
