@@ -1,6 +1,6 @@
 module github.com/sunqirui1987/ae-mcp
 
-go 1.23.6
+go 1.23
 
 require github.com/mark3labs/mcp-go v0.22.0
 
